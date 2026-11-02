@@ -1,0 +1,13 @@
+# Raw data stays out of the repo
+*.txt
+!requirements.txt
+*.zip
+*.csv
+
+# Credentials
+.databrickscfg
+*accessKeys*.csv
+.env
+
+# OS
+.DS_Store
