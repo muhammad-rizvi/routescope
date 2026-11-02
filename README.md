@@ -1,4 +1,4 @@
-# MetroPulse – Houston Transit Data Pipeline
+# RouteScope – Houston Transit Data Pipeline
 
 A cloud data pipeline that takes Houston METRO's published bus and rail schedule (GTFS), lands it in AWS S3, cleans and models it in Databricks with PySpark using a bronze/silver/gold (medallion) design, and answers service questions with SQL and a Databricks dashboard.
 
