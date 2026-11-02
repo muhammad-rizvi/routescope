@@ -81,10 +81,28 @@ The first version of the ingest step used `boto3`'s `download_file()` to write d
 
 ## Limitations
 
-- Scheduled service only. No ridership, delays or real-time vehicle positions.
-- One representative weekday. Every regular weekday in this feed has the same schedule, but Saturday and Sunday service is not analyzed.
-- Headway is the median gap between trip start times from 10 AM to 2 PM, using the less frequent of the two directions. It reflects scheduled frequency at the start of each route, not at every stop.
-- Hubs are individual stops, since the feed does not group stops into stations.
+**What the data measures**
+
+- **Scheduled service, not actual service.** GTFS static data is METRO's published plan. It says nothing about ridership, crowding, delays, cancellations or where vehicles actually are. A route can be scheduled every 10 minutes and still run late or bunched in practice.
+- **Trips, not capacity.** A rail trip and a bus trip each count as one trip, even though a train carries far more people. Trip counts also ignore route length, so a short downtown route and a 100-minute crosstown route count the same per trip.
+- **On-demand services are not included.** 11 of METRO's 120 routes have no fixed weekday schedule in this feed: the six curb2curb zones and the five Community Connector services. These are booked or flexible services, so the pipeline covers the 109 fixed-route bus and rail lines only.
+
+**How the analysis is scoped**
+
+- **One service day.** The analysis uses Wednesday, November 4, 2026. In this feed every regular weekday runs the same schedule (service 6), so the results hold for any normal Monday–Friday, but holidays and Saturday/Sunday service are not analyzed. Weekend trips make up 58% of all trips in the feed and would tell a different story.
+- **One feed version.** The results describe the schedule valid from Aug 30, 2026 to Jan 23, 2027. METRO revises its schedules several times a year, so numbers like trip counts and headways will change with the next feed. The pipeline can be rerun on a new feed, but the findings here are a snapshot.
+
+**How the metrics are defined**
+
+- **Headway is measured at the start of each trip.** It is the median gap between trip start times from 10 AM to 2 PM, for each direction, and the route keeps the less frequent of its two directions. This is a conservative choice, but it has blind spots: routes with branches or short trips that serve only part of the line can look more frequent than they are at the far ends of the route.
+- **Frequent service is a single-route measure.** A stop counts as having frequent service only if at least one route serving it runs every 15 minutes or better. This can miss stops where several less frequent routes overlap and together arrive more often than every 15 minutes, so the 33.3% figure is likely an undercount of combined frequency at busy corridors.
+- **Hours are based on trip start times.** The hourly chart counts a trip in the hour it begins, not the hours it is on the road. A trip that starts at 5:50 AM and runs until 7:30 AM appears only in the 5 AM bar.
+- **The 15-minute cutoff matters.** Many routes have a midday headway of exactly 15 minutes, so a 12- or 20-minute threshold would change the count of frequent routes noticeably. 15 minutes is a common planning standard, but it is a choice, not a fact in the data.
+
+**Stops and hubs**
+
+- **Hubs are measured per stop ID, not per station.** The feed leaves `parent_station` empty, so stops that belong to the same transit center are counted separately. Northwest Transit Center is split into two platforms, and Texas Medical Center and Downtown Transit Center each have three stop IDs. Large multi-platform centers are therefore underrated in the hub ranking.
+- **Stops are not people.** "One in three stops" is not the same as "one in three residents." Stops in dense areas serve far more people than stops in low-density areas, and the analysis does not account for population, jobs or walking distance.
 
 ## Future work
 
